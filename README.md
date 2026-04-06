@@ -23,12 +23,17 @@ HDRP. **KinoEight URP** is a simple port of this effect for URP.
 - Universal Render Pipeline
 
 ## How to Install
-
-You can install the KinoEight package
-(`jp.keijiro.kino.post-processing.eight.universal`) via the "Keijiro" scoped
-registry using the Unity Package Manager. To add the registry to your project,
-follow [these instructions].
-
+ 
+Add the following line to the `dependencies` section of your project's
+`Packages/manifest.json`:
+ 
+```json
+"jp.keijiro.kino.post-processing.eight.universal": "https://github.com/LucaCatone/KinoEightURP.git?path=Packages/jp.keijiro.kino.post-processing.eight.universal"
+```
+ 
+> If you prefer installing the original package via the Keijiro scoped
+> registry instead, follow [these instructions].
+ 
 [these instructions]:
   https://gist.github.com/keijiro/f8c7e8ff29bfe63d86b888901b82644c
 
