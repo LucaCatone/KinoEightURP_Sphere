@@ -1,3 +1,12 @@
+# *Fork of [keijiro/KinoEightURP](https://github.com/keijiro/KinoEightURP)*
+
+**Changes from original:**
+- Replaced screen-space Bayer dithering with sphere-mapped dithering to eliminate camera rotation jitter
+- Dither pattern is now anchored to world space via camera axis vectors, inspired by the technique described in Lucas Pope's Obra Dinn devlog
+- Added `SphereDitherMatrix.cs` component to pass camera orientation to the shader each frame
+- Upgraded from 2x2 to 4x4 Bayer matrix for finer dithering
+- Pole blending: smooth fallback to screen-space dithering when looking straight up/down to reduce spherical projection artifacts
+
 # KinoEight for URP
 
 ![gif](https://i.imgur.com/KJ4pgJ3.gif)
