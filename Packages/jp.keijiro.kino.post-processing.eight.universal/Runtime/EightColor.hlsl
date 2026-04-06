@@ -8,10 +8,21 @@ half _Opacity;
 float4 _PaletteLab[PALETTE_ENTRIES];
 float4 _PaletteRGB[PALETTE_ENTRIES];
 
+float3 _CameraRight;
+float3 _CameraUp;
+float3 _CameraForward;
+float _CameraFovScale;
+float _CameraAspect;
+
 SAMPLER(sampler_BlitTexture);
 
 // 2x2 Bayer matrix for dithering
-static const half bayer2x2[] = {-0.5, 0, 0.25, -0.25};
+static const half bayer4x4[16] = {
+    -0.5,    0.0,   -0.375,  0.125,
+     0.25,  -0.25,   0.375, -0.125,
+    -0.3125, 0.1875,-0.4375, 0.0625,
+     0.4375,-0.0625, 0.3125,-0.1875
+};
 
 // Distance without sqrt
 half ec_sqdist(half3 a, half3 b)
@@ -39,8 +50,28 @@ half4 Fragment(Varyings input) : SV_Target
     uint2 pss = input.texcoord * _BlitTexture_TexelSize.zw / _Downsampling;
     float2 uv = (pss + 0.5) * _Downsampling * _BlitTexture_TexelSize.xy;
 
-    // Dithering (2x2 bayer)
-    half dither = bayer2x2[(pss.y & 1) * 2 + (pss.x & 1)] * _Dithering;
+    // Sphere-mapped dithering
+    // Costruisce la world direction direttamente dagli assi della camera
+    // cosi il pattern e' ancorato al mondo e non jitta alla rotazione
+    float2 ndc = input.texcoord * 2.0 - 1.0;
+    float3 worldDir = normalize(
+        _CameraForward +
+        _CameraRight   * ndc.x * _CameraFovScale * _CameraAspect +
+        _CameraUp      * ndc.y * _CameraFovScale
+    );
+
+    // Coordinate sferiche -> indice Bayer 2x2
+    float theta = atan2(worldDir.x, worldDir.z) / (2.0 * 3.14159265);
+    float phi   = asin(clamp(worldDir.y, -1.0, 1.0)) / 3.14159265;
+    uint2 sphereIndex = uint2(abs(frac(float2(theta, phi)) * 250.0) * 4.0) % 4;
+
+    float poleFade = abs(worldDir.y); // 0 = orizzonte, 1 = polo
+    float2 screenIndex2 = frac(input.texcoord * 50.0) * 4.0;
+    uint2 screenIdx = uint2(screenIndex2) % 4;
+    half ditherScreen = bayer4x4[screenIdx.y * 4 + screenIdx.x] * _Dithering;
+
+    half dither = bayer4x4[sphereIndex.y * 4 + sphereIndex.x] * _Dithering;
+    dither = lerp(dither, ditherScreen, pow(poleFade, 4.0));
 
     // Source color sampling in Linear sRGB / Gamma sRGB / OKLab
     half4 src = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv);
