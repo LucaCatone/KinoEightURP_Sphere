@@ -28,7 +28,7 @@ Add the following line to the `dependencies` section of your project's
 `Packages/manifest.json`:
  
 ```json
-"jp.keijiro.kino.post-processing.eight.universal": "https://github.com/LucaCatone/KinoEightURP.git?path=Packages/jp.keijiro.kino.post-processing.eight.universal"
+"jp.keijiro.kino.post-processing.eight.universal": "https://github.com/LucaCatone/KinoEightURP_Sphere.git?path=Packages/jp.keijiro.kino.post-processing.eight.universal"
 ```
  
 > If you prefer installing the original package via the Keijiro scoped
