@@ -1,11 +1,10 @@
 # *Fork of [keijiro/KinoEightURP](https://github.com/keijiro/KinoEightURP)*
 
 **Changes from original:**
-- Replaced screen-space Bayer dithering with sphere-mapped dithering to eliminate camera rotation jitter
-- Dither pattern is now anchored to world space via camera axis vectors, inspired by the technique described in Lucas Pope's Obra Dinn devlog
-- Added `SphereDitherMatrix.cs` component to pass camera orientation to the shader each frame. Add this component to any GameObject to make the new shader work.
-- Upgraded from 2x2 to 4x4 Bayer matrix for finer dithering
-- Pole blending: smooth fallback to screen-space dithering when looking straight up/down to reduce spherical projection artifacts
+- Replaced screen-space Bayer dithering with **triplanar world-space dithering**.
+- The dither pattern is now firmly anchored to the 3D environment by reconstructing the absolute world position from the depth buffer. This entirely eliminates both camera rotation and translation jitter.
+- Upgraded from 2x2 to 4x4 Bayer matrix for finer dithering.
+- Retained the `SphereDitherMatrix.cs` component to pass camera orientation to the shader each frame (now used to calculate triplanar blending weights). 
 
 # KinoEight for URP
 
@@ -51,10 +50,9 @@ colors. It includes additional options:
 
 ### How to Use
 
-1. Add the **Eight Color Feature** to the **Renderer Features** list in your
-   URP Renderer asset.
-2. Add the **Eight Color Controller** component to any camera you want to apply
-   the effect to. The effect is applied only to cameras with this component.
+1.  **Crucial:** Enable **Depth Texture** in your URP Asset and on your Camera. The shader requires depth to reconstruct the world-space position.
+2.  Add the **Eight Color Feature** to the **Renderer Features** list in your URP Renderer asset.
+3.  Add the **Eight Color Controller** and **SphereDitherMatrix** components to any camera you want to apply the effect to. The effect is applied only to cameras with these components.
 
 ## Current Limitations
 
