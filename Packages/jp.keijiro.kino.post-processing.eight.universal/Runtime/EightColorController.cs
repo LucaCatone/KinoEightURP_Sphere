@@ -32,7 +32,7 @@ public sealed partial class EightColorController : MonoBehaviour
 
     [field:SerializeField] public bool Extended { get; set; }
     [field:SerializeField, Range(0, 1)] public float Dithering { get; set; } = 0.05f;
-    [field:SerializeField, Range(50f, 500f)] public float DitherScale { get; set; } = 250f;
+    [field:SerializeField, Range(1, 50)] public float DitherScale { get; set; } = 20f;
     [field:SerializeField, Range(1, 32)] public int Downsampling { get; set; } = 1;
     [field:SerializeField, Range(0, 1)] public float Opacity { get; set; } = 1;
 
