@@ -5,6 +5,7 @@
 half _Dithering;
 uint _Downsampling;
 half _Opacity;
+float _DitherScale;
 float4 _PaletteLab[PALETTE_ENTRIES];
 float4 _PaletteRGB[PALETTE_ENTRIES];
 
@@ -16,7 +17,7 @@ float _CameraAspect;
 
 SAMPLER(sampler_BlitTexture);
 
-// 2x2 Bayer matrix for dithering
+// 4x4 Bayer matrix for dithering
 static const half bayer4x4[16] = {
     -0.5,    0.0,   -0.375,  0.125,
      0.25,  -0.25,   0.375, -0.125,
@@ -60,13 +61,14 @@ half4 Fragment(Varyings input) : SV_Target
         _CameraUp      * ndc.y * _CameraFovScale
     );
 
-    // Coordinate sferiche -> indice Bayer 2x2
+    // Coordinate sferiche -> indice Bayer 4x4
     float theta = atan2(worldDir.x, worldDir.z) / (2.0 * 3.14159265);
     float phi   = asin(clamp(worldDir.y, -1.0, 1.0)) / 3.14159265;
-    uint2 sphereIndex = uint2(abs(frac(float2(theta, phi)) * 250.0) * 4.0) % 4;
+    uint2 sphereIndex = uint2(abs(frac(float2(theta, phi)) * _DitherScale) * 4.0) % 4;
 
-    float poleFade = abs(worldDir.y); // 0 = orizzonte, 1 = polo
-    float2 screenIndex2 = frac(input.texcoord * 50.0) * 4.0;
+    // Pole blending: fallback to screen-space near poles to reduce artifacts
+    float poleFade = abs(worldDir.y);
+    float2 screenIndex2 = frac(input.texcoord * _DitherScale * 0.2) * 4.0;
     uint2 screenIdx = uint2(screenIndex2) % 4;
     half ditherScreen = bayer4x4[screenIdx.y * 4 + screenIdx.x] * _Dithering;
 
