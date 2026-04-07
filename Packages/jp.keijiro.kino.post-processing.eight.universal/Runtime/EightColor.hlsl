@@ -1,6 +1,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
 half _Dithering;
 uint _Downsampling;
@@ -51,9 +52,7 @@ half4 Fragment(Varyings input) : SV_Target
     uint2 pss = input.texcoord * _BlitTexture_TexelSize.zw / _Downsampling;
     float2 uv = (pss + 0.5) * _Downsampling * _BlitTexture_TexelSize.xy;
 
-    // Sphere-mapped dithering
-    // Costruisce la world direction direttamente dagli assi della camera
-    // cosi il pattern e' ancorato al mondo e non jitta alla rotazione
+    // Calcola la direzione vista (mantiene la rotazione stabile per il blending)
     float2 ndc = input.texcoord * 2.0 - 1.0;
     float3 worldDir = normalize(
         _CameraForward +
@@ -61,19 +60,23 @@ half4 Fragment(Varyings input) : SV_Target
         _CameraUp      * ndc.y * _CameraFovScale
     );
 
-    // Coordinate sferiche -> indice Bayer 4x4
-    float theta = atan2(worldDir.x, worldDir.z) / (2.0 * 3.14159265);
-    float phi   = asin(clamp(worldDir.y, -1.0, 1.0)) / 3.14159265;
-    uint2 sphereIndex = uint2(abs(frac(float2(theta, phi)) * _DitherScale) * 4.0) % 4;
+    // Leggi la Depth e calcola la World Position assoluta
+    float depth = SampleSceneDepth(input.texcoord);
+    float3 worldPos = ComputeWorldSpacePosition(input.texcoord, depth, UNITY_MATRIX_I_VP);
 
-    // Pole blending: fallback to screen-space near poles to reduce artifacts
-    float poleFade = abs(worldDir.y);
-    float2 screenIndex2 = frac(input.texcoord * _DitherScale * 0.2) * 4.0;
-    uint2 screenIdx = uint2(screenIndex2) % 4;
-    half ditherScreen = bayer4x4[screenIdx.y * 4 + screenIdx.x] * _Dithering;
+    // Mappatura Triplanar della matrice di Bayer basata sulle coordinate spaziali
+    float3 ditherUV = worldPos * _DitherScale;
+    uint3 bayerIdx = uint3(abs(frac(ditherUV)) * 4.0) % 4;
 
-    half dither = bayer4x4[sphereIndex.y * 4 + sphereIndex.x] * _Dithering;
-    dither = lerp(dither, ditherScreen, pow(poleFade, 4.0));
+    // Pesi per fondere i 3 assi (basati sulla direzione della telecamera come approssimazione delle normali)
+    float3 blend = abs(worldDir);
+    blend /= (blend.x + blend.y + blend.z);
+
+    half ditherX = bayer4x4[bayerIdx.y * 4 + bayerIdx.z];
+    half ditherY = bayer4x4[bayerIdx.x * 4 + bayerIdx.z];
+    half ditherZ = bayer4x4[bayerIdx.x * 4 + bayerIdx.y];
+
+    half dither = (ditherX * blend.x + ditherY * blend.y + ditherZ * blend.z) * _Dithering;
 
     // Source color sampling in Linear sRGB / Gamma sRGB / OKLab
     half4 src = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv);
