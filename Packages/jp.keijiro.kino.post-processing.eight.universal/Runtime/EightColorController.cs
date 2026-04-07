@@ -32,6 +32,7 @@ public sealed partial class EightColorController : MonoBehaviour
 
     [field:SerializeField] public bool Extended { get; set; }
     [field:SerializeField, Range(0, 1)] public float Dithering { get; set; } = 0.05f;
+    [field:SerializeField, Range(50f, 500f)] public float DitherScale { get; set; } = 250f;
     [field:SerializeField, Range(1, 32)] public int Downsampling { get; set; } = 1;
     [field:SerializeField, Range(0, 1)] public float Opacity { get; set; } = 1;
 
@@ -55,6 +56,7 @@ public sealed partial class EightColorController : MonoBehaviour
     static class IDs
     {
         internal static readonly int Dithering = Shader.PropertyToID("_Dithering");
+        internal static readonly int DitherScale = Shader.PropertyToID("_DitherScale");
         internal static readonly int Downsampling = Shader.PropertyToID("_Downsampling");
         internal static readonly int Opacity = Shader.PropertyToID("_Opacity");
         internal static readonly int PaletteRgb = Shader.PropertyToID("_PaletteRGB");
@@ -133,6 +135,7 @@ public sealed partial class EightColorController : MonoBehaviour
         _material.SetFloat(IDs.Dithering, Dithering);
         _material.SetInteger(IDs.Downsampling, Downsampling);
         _material.SetFloat(IDs.Opacity, Opacity);
+        _material.SetFloat(IDs.DitherScale, DitherScale);
 
         return _material;
     }
