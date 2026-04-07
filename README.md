@@ -44,8 +44,8 @@ The **Eight Color** effect reduces the color palette of an image to eight
 colors. It includes additional options:
 
 - **Extended**: Expands the color palette to 16 colors.
-- **Dithering**: Soften banding artifacts with a low-resolution dithering
-  pattern.
+- **Dithering**: Soften banding artifacts with a low-resolution dithering pattern.
+- **Dithering Scale**: Control the dimension of the dithering pattern (default: 20). Enter in debug mode to modify this value (temporary solution).
 - **Downsampling**: Pixelate the image by lowering its resolution.
 
 ### How to Use
