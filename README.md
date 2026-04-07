@@ -53,8 +53,3 @@ colors. It includes additional options:
 1.  **Crucial:** Enable **Depth Texture** in your URP Asset and on your Camera. The shader requires depth to reconstruct the world-space position.
 2.  Add the **Eight Color Feature** to the **Renderer Features** list in your URP Renderer asset.
 3.  Add the **Eight Color Controller** and **SphereDitherMatrix** components to any camera you want to apply the effect to. The effect is applied only to cameras with these components.
-
-## Current Limitations
-
-The Tiled Palette effect from the original KinoEight HDRP package is not yet
-available in this URP version.
