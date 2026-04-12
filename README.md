@@ -46,6 +46,7 @@ colors. It includes additional options:
 - **Extended**: Expands the color palette to 16 colors.
 - **Dithering**: Soften banding artifacts with a low-resolution dithering pattern.
 - **Dithering Scale**: Control the dimension of the dithering pattern (default: 20). Enter in debug mode to modify this value (temporary solution).
+- **Dither Threshold**: Controls the minimum luminance required for dithering to appear. Pixels darker than this value are left untouched, concentrating the dithering effect on lit areas and transitions between light and shadow. Enter in debug mode to modify this value (temporary solution).
 - **Downsampling**: Pixelate the image by lowering its resolution.
 
 ### How to Use
