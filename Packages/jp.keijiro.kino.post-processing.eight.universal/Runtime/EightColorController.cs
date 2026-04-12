@@ -33,6 +33,7 @@ public sealed partial class EightColorController : MonoBehaviour
     [field:SerializeField] public bool Extended { get; set; }
     [field:SerializeField, Range(0, 1)] public float Dithering { get; set; } = 0.05f;
     [field:SerializeField, Range(1, 50)] public float DitherScale { get; set; } = 20f;
+    [field:SerializeField, Range(0f, 0.5f)] public float DitherThreshold { get; set; } = 0.05f;
     [field:SerializeField, Range(1, 32)] public int Downsampling { get; set; } = 1;
     [field:SerializeField, Range(0, 1)] public float Opacity { get; set; } = 1;
 
@@ -58,6 +59,7 @@ public sealed partial class EightColorController : MonoBehaviour
         internal static readonly int Dithering = Shader.PropertyToID("_Dithering");
         internal static readonly int DitherScale = Shader.PropertyToID("_DitherScale");
         internal static readonly int Downsampling = Shader.PropertyToID("_Downsampling");
+        internal static readonly int DitherThreshold = Shader.PropertyToID("_DitherThreshold");
         internal static readonly int Opacity = Shader.PropertyToID("_Opacity");
         internal static readonly int PaletteRgb = Shader.PropertyToID("_PaletteRGB");
         internal static readonly int PaletteLab = Shader.PropertyToID("_PaletteLab");
@@ -136,6 +138,7 @@ public sealed partial class EightColorController : MonoBehaviour
         _material.SetInteger(IDs.Downsampling, Downsampling);
         _material.SetFloat(IDs.Opacity, Opacity);
         _material.SetFloat(IDs.DitherScale, DitherScale);
+        _material.SetFloat(IDs.DitherThreshold, DitherThreshold);
 
         return _material;
     }

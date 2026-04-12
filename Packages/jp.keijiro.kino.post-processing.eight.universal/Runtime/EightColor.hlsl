@@ -15,6 +15,7 @@ float3 _CameraUp;
 float3 _CameraForward;
 float _CameraFovScale;
 float _CameraAspect;
+float _DitherThreshold; // default 0.05 — sotto questa luminanza il dither sparisce
 
 SAMPLER(sampler_BlitTexture);
 
@@ -76,10 +77,20 @@ half4 Fragment(Varyings input) : SV_Target
     half ditherY = bayer4x4[bayerIdx.x * 4 + bayerIdx.z];
     half ditherZ = bayer4x4[bayerIdx.x * 4 + bayerIdx.y];
 
-    half dither = (ditherX * blend.x + ditherY * blend.y + ditherZ * blend.z) * _Dithering;
-
     // Source color sampling in Linear sRGB / Gamma sRGB / OKLab
     half4 src = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_BlitTexture, uv);
+
+
+    // Luminanza del pixel sorgente (0 = nero, 1 = bianco)
+    half luma = dot(src.rgb, half3(0.299, 0.587, 0.114));
+
+    // Maschera: dither pieno solo nelle zone di transizione
+    // nelle zone completamente nere o completamente bianche si annulla
+    // _DitherThreshold controlla quanto vicino al nero inizia il dither (default 0.05)
+    half mask = smoothstep(0.0, _DitherThreshold, luma);
+
+    half dither = (ditherX * blend.x + ditherY * blend.y + ditherZ * blend.z) * _Dithering * mask;
+
     half3 src_linear = saturate(src.rgb + dither);
     half3 src_gamma = LinearToSRGB(src_linear);
     half3 src_lab = ec_LinearToOKLab(src_linear);
