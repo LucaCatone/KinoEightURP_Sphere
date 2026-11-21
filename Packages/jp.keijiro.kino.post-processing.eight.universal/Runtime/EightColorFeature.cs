@@ -40,15 +40,21 @@ sealed class EightColorPass : ScriptableRenderPass
 
 public sealed class EightColorFeature : ScriptableRendererFeature
 {
+    [SerializeField] bool _beforePostProcessing;
+
     EightColorPass _pass;
 
     public override void Create()
-      => _pass = new EightColorPass
-           { renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing };
+      => _pass = new EightColorPass();
 
     public override void AddRenderPasses(ScriptableRenderer renderer,
                                          ref RenderingData data)
-      => renderer.EnqueuePass(_pass);
+    {
+        _pass.renderPassEvent = _beforePostProcessing
+            ? RenderPassEvent.BeforeRenderingPostProcessing
+            : RenderPassEvent.AfterRenderingPostProcessing;
+        renderer.EnqueuePass(_pass);
+    }
 }
 
 } // namespace Kino.PostProcessing.Eight.Universal
